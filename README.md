@@ -12,15 +12,14 @@ Steps to include <a href="https://github.com/angular-ui-tree/angular-ui-tree">an
 <li>Then use <code>ng-repeat</code>for elements of ordered list and also give them <code>ui-tree-node</code> attribute.<br>
 For example :
 <br>
-```html
-<pre>
+
+`
 <div ui-tree id="tree-root">
   <ol ui-tree-nodes="" ng-model="data">
     <li ng-repeat="node in data" ui-tree-node ng-include="'nodes_renderer.html'"></li>
   </ol>
 </div>
-</pre>
-```
+`
 
 </li><br>
 <li>That's it for your html page. Now you have to initialize an array of JSON object in your current scope which stores hierarchy.(As shown in *app.js* file)</li><br>
