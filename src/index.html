@@ -15,7 +15,56 @@ function _kms(u){
 _kms('//i.kissmetrics.io/i.js');
 _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
 </script>
+<script>
+  (function() {
+    window.VWO = window.VWO || [];
+    var WAIT_TIME = 100,
+      analyticsTimer = 0,
+      dataSendingTimer;
 
+    // All tracking variable will be contained in this array/object
+    window.v = [];
+    window.vwoHeapData = {};
+    v.add = function(w, o) {
+      vwoHeapData[w] = o;
+      v.push({
+        w: w,
+        o: o
+      });
+    };
+    // Function to send data to Heap
+    var sendData = function() {
+      window.heap.addUserProperties(vwoHeapData);
+    };
+    //Function to wait for Heap before sending data
+    function waitForAnalyticsVariables() {
+      if (window.heap && window.heap.loaded) {
+        clearInterval(analyticsTimer);
+        sendData();
+      } else if (!analyticsTimer) {
+        analyticsTimer = setInterval(function() {
+          waitForAnalyticsVariables();
+        }, WAIT_TIME);
+      }
+    }
+    window.VWO.push(['onVariationApplied', function(data) {
+      if (!data) {
+        return;
+      }
+      var expId = data[1],
+        variationId = data[2];
+      if (expId && variationId && ['VISUAL_AB', 'VISUAL', 'SPLIT_URL'].indexOf(_vwo_exp[expId].type) > -1) {
+        v.add('VWO-ExpId-' + expId, _vwo_exp[expId].comb_n[variationId]);
+        // Only send if data is available
+        if (v.length) {
+          clearTimeout(dataSendingTimer);
+          // We are using setTimeout so that all experiment can be sent in just one call to Heap
+          dataSendingTimer = setTimeout(waitForAnalyticsVariables, WAIT_TIME);
+        }
+      }
+    }]);
+  })();
+</script>
 <script type="text/javascript">
   (function(e,t){var n=e.amplitude||{_q:[],_iq:{}};var r=t.createElement("script")
   ;r.type="text/javascript"
