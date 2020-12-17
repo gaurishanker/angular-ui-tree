@@ -22,9 +22,9 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
       window.VWO = window.VWO || [];
       var pollInterval = 100;
       var _vis_data = { FS: {}, heap: {} };
-      var intervalObj = { heap: {}, FS: {}}
+      var intervalObj = { heap: undefined, FS: undefined}
+      var analyticsTimerObj = { heap: undefined, FS: undefined}
       var dataSendingTimer;
-      var analyticsTimer;
       var experimentListObj = {};
       window.VWO.push([
         "onVariationApplied",
@@ -41,7 +41,8 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
               window._vwo_exp[expId].type
             ) > -1
           ) {
-            (function () {
+            (
+                function () {
               var settings = {
                 integrationType: "push",
                 flushData: false,
@@ -63,13 +64,14 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
               var waitingObj = settings["waitingObj"];
               var flushData = settings["flushData"];
               var intervalName = intervalObj[namespace];
+              var analyticsTimer = analyticsTimerObj[namespace];
               experimentListObj[namespace] = experimentList;
               if (experimentListObj[namespace].indexOf(+expId) !== -1) {
-                _vis_data["heap"]["VWOSSS-ExpId-" + expId] =
+                _vis_data["heap"]["VWO-ExpId-" + expId] =
                   _vwo_exp[expId].comb_n[variationId];
-                  clearTimeout(dataSendingTimer);
+                  clearTimeout(intervalName);
                   // We are using setTimeout so that all experiment can be sent in just one call to Heap
-                  dataSendingTimer = setTimeout(function waitForAnalyticsVariables(){
+                  intervalName = setTimeout(function waitForAnalyticsVariables(){
                     if (window.heap && window.heap.loaded) {
                         clearInterval(analyticsTimer);
                         window.heap.addUserProperties(_vis_data[namespace]);
@@ -86,7 +88,6 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
       ]);
     })();
 </script>
-
 
 
 <script type="text/javascript">
