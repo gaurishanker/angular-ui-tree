@@ -63,20 +63,18 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
               var eventType = settings["eventType"];
               var waitingObj = settings["waitingObj"];
               var flushData = settings["flushData"];
-              var intervalName = intervalObj[namespace];
-              var analyticsTimer = analyticsTimerObj[namespace];
               experimentListObj[namespace] = experimentList;
               if (experimentListObj[namespace].indexOf(+expId) !== -1) {
-                _vis_data["heap"]["VWOSSSSSSSSSSSSSSSSSSSSS-ExpId-" + expId] =
+                _vis_data["heap"]["VWOSSSSSSSS-ExpId-" + expId] =
                   _vwo_exp[expId].comb_n[variationId];
-                  clearTimeout(intervalName);
+                  clearTimeout(intervalObj[namespace]);
                   // We are using setTimeout so that all experiment can be sent in just one call to Heap
-                  intervalName = setTimeout(function waitForAnalyticsVariables(){
+                  intervalObj[namespace] = setTimeout(function waitForAnalyticsVariables(){
                     if (window.heap && window.heap.loaded) {
-                        clearInterval(analyticsTimer);
+                        clearInterval(analyticsTimerObj[namespace]);
                         window.heap.addUserProperties(_vis_data[namespace]);
-                      } else if (!analyticsTimer) {
-                        analyticsTimer = setInterval(function() {
+                      } else if (!analyticsTimerObj[namespace]) {
+                        analyticsTimerObj[namespace] = setInterval(function() {
                           waitForAnalyticsVariables();
                         }, pollInterval);
                       }
@@ -88,7 +86,6 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
       ]);
     })();
 </script>
-
 
 <script type="text/javascript">
   (function(e,t){var n=e.amplitude||{_q:[],_iq:{}};var r=t.createElement("script")
