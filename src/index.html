@@ -21,7 +21,8 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
       var pollInterval = 100;
       var _vis_data = { FS: {}, heap: {} };
       var intervalObj = { heap: {}, FS: {}}
-      var dataSendingTimer 
+      var dataSendingTimer;
+      var analyticsTimer;
       var experimentListObj = {};
       window.VWO.push([
         "onVariationApplied",
@@ -38,83 +39,6 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
               window._vwo_exp[expId].type
             ) > -1
           ) {
-            (function () {
-              var settings = {
-                integrationType: "push",
-                flushData: true,
-                method: "event",
-                eventType: "params",
-                waitingObj: { wFE: false, wE: "event" },
-                loopEvent: false,
-                genericObject:
-                  "_vis_data[\"FS\"]['experiment_id_str'] = expId;_vis_data[\"FS\"]['experiment_name_str'] = _vwo_exp[expId].name;_vis_data[\"FS\"]['variation_id_str'] = variationId;_vis_data[\"FS\"]['variation_name_str'] = _vwo_exp[expId].comb_n[variationId];",
-                namespace: "FS",
-                eventName: "VWO",
-                experimentList: [1, 10],
-              };
-              var namespace = settings["namespace"];
-              var experimentList = settings["experimentList"];
-              var method = settings["method"];
-              var eventName = settings["eventName"];
-              var eventType = settings["eventType"];
-              var waitingObj = settings["waitingObj"];
-              var flushData = settings["flushData"];
-              var intervalName = namespace + "Interval";
-              experimentListObj[namespace] = experimentList;
-              if (experimentListObj[namespace].indexOf(+expId) !== -1) {
-                _vis_data["FS"]["experiment_id_str"] = expId;
-                _vis_data["FS"]["experiment_name_str"] = _vwo_exp[expId].name;
-                _vis_data["FS"]["variation_id_str"] = variationId;
-                _vis_data["FS"]["variation_name_str"] =
-                  _vwo_exp[expId].comb_n[variationId];
-                (function waitForTimer(namespace) {
-                  intervalName = setInterval(() => {
-                    if (waitingObj["wFE"] === true) {
-                      if (
-                        window[namespace] &&
-                        window[namespace][waitingObj["wE"]]
-                      ) {
-                        if (eventType == "params")
-                          window[namespace][method](
-                            eventName,
-                            _vis_data[namespace]
-                          );
-                        else if (eventType == "array")
-                          window[namespace][method]([
-                            eventName,
-                            _vis_data[namespace],
-                          ]);
-                        else if (eventType == "individualValue")
-                          window[namespace][method](_vis_data[namespace]);
-                        clearInterval(intervalName);
-                        if (flushData === true) _vis_data[namespace] = {};
-                      } else {
-                        waitForTimer(namespace);
-                      }
-                    } else {
-                      if (window[namespace] && window[namespace][method]) {
-                        if (eventType == "params")
-                          window[namespace][method](
-                            eventName,
-                            _vis_data[namespace]
-                          );
-                        else if (eventType == "array")
-                          window[namespace][method]([
-                            eventName,
-                            _vis_data[namespace],
-                          ]);
-                        else if (eventType == "individualValue")
-                          window[namespace][method](_vis_data[namespace]);
-                        clearInterval(intervalName);
-                        if (flushData === true) _vis_data[namespace] = {};
-                      } else {
-                        waitForTimer(namespace);
-                      }
-                    }
-                  }, pollInterval);
-                })(namespace);
-              }
-            })();
             (function () {
               var settings = {
                 integrationType: "push",
@@ -141,57 +65,18 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
               if (experimentListObj[namespace].indexOf(+expId) !== -1) {
                 _vis_data["heap"]["VWO-ExpId-" + expId] =
                   _vwo_exp[expId].comb_n[variationId];
-                (function waitForTimer(namespace) {
-                    if(intervalName) {
-                        clearInterval(intervalName);
-                    }
-                    intervalName = setInterval(() => {
-                    if (waitingObj["wFE"] === true) {
-                      if (
-                        window[namespace] &&
-                        window[namespace][waitingObj["wE"]]
-                      ) {
-                        if (eventType == "params")
-                          window[namespace][method](
-                            eventName,
-                            _vis_data[namespace]
-                          );
-                        else if (eventType == "array")
-                          window[namespace][method]([
-                            eventName,
-                            _vis_data[namespace],
-                          ]);
-                        else if (eventType == "individualValue") {
-                            
-                            window[namespace][method](_vis_data[namespace]);
-                        } 
-                        clearInterval(intervalName);
-                        if (flushData === true) _vis_data[namespace] = {};
-                      } else {
-                        waitForTimer(namespace);
+                  clearTimeout(dataSendingTimer);
+                  // We are using setTimeout so that all experiment can be sent in just one call to Heap
+                  dataSendingTimer = setTimeout(function waitForAnalyticsVariables(){
+                    if (window.heap && window.heap.loaded) {
+                        clearInterval(analyticsTimer);
+                        window.heap.addUserProperties(_vis_data[namespace]);
+                      } else if (!analyticsTimer) {
+                        analyticsTimer = setInterval(function() {
+                          waitForAnalyticsVariables();
+                        }, WAIT_TIME);
                       }
-                    } else {
-                      if (window[namespace] && window[namespace][method]) {
-                        if (eventType == "params")
-                          window[namespace][method](
-                            eventName,
-                            _vis_data[namespace]
-                          );
-                        else if (eventType == "array")
-                          window[namespace][method]([
-                            eventName,
-                            _vis_data[namespace],
-                          ]);
-                        else if (eventType == "individualValue")
-                          window[namespace][method](_vis_data[namespace]);
-                        clearInterval(intervalName);
-                        if (flushData === true) _vis_data[namespace] = {};
-                      } else {
-                        waitForTimer(namespace);
-                      }
-                    }
-                  }, pollInterval);
-                })(namespace);
+                  }, WAIT_TIME);
               }
             })();
           }
