@@ -65,7 +65,7 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
               var intervalName = intervalObj[namespace];
               experimentListObj[namespace] = experimentList;
               if (experimentListObj[namespace].indexOf(+expId) !== -1) {
-                _vis_data["heap"]["VWO-ExpId-" + expId] =
+                _vis_data["heap"]["VWOSSS-ExpId-" + expId] =
                   _vwo_exp[expId].comb_n[variationId];
                   clearTimeout(dataSendingTimer);
                   // We are using setTimeout so that all experiment can be sent in just one call to Heap
@@ -86,7 +86,6 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
       ]);
     })();
 </script>
-
 
 
 
