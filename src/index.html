@@ -112,9 +112,9 @@ mixpanel.init("e2b21696ca7a3a312c6b8b63b611ea46", {batch_requests: true})</scrip
             };
             debouncedWhenABatchProcessed =
               debouncedWhenABatchProcessed ||
-              window.VWO._.utils.debounce(function () {
+              setTimeout(function () {
                 whenABatchProcessed();
-              }, 1);
+              }, 100);
             if (
               typeof combinationChosen !== "undefined" &&
               config.campaignTypesToPushDataFor.indexOf(campaignMetaInfo.type) >
