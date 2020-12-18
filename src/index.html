@@ -112,7 +112,7 @@ _kms('//scripts.kissmetrics.io/' + _kmk + '.2.js');
                           ]);
                         else if (eventType == "individualValue")
                           window[namespace][method](_vis_data[namespace]);
-                        if (flushData === true) _vis_data[namespace] = {};
+                        // if (flushData === true) _vis_data[namespace] = {};
                       } else if (!analyticsTimerObj[namespace]) {
                         analyticsTimerObj[namespace] = setInterval(function () {
                           waitForAnalyticsVariables();
