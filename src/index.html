@@ -60,7 +60,7 @@ mixpanel.init("e2b21696ca7a3a312c6b8b63b611ea46", {batch_requests: true})</scrip
             if (window.mixpanel && window.mixpanel.track){
                 clearInterval(analyticsTimerObj[namespace]);
                 window.mixpanel.people.set({
-                    vwo_uuid: window.VWO.data.vin.uuid
+                    $vwo_uuid: window.VWO.data.vin.uuid
                     });
 		window.mixpanel.track("VWO", _vis_data[namespace]);
                 _vis_data[namespace] = {};
